@@ -25,7 +25,7 @@
     </header>
 
     <main class="work-page">
-      {% if page.cover %}
+      {% if page.cover and page.show_hero != false %}
         <img class="work-hero-image" src="{{ page.cover | relative_url }}" alt="{{ page.title }}の画像" />
       {% endif %}
 
