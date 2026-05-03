@@ -6,6 +6,7 @@ description: クリックするとセレスのセリフが変わる小さな作�
 cover: /assets/uploads/day1-celes.png
 permalink: /works/day1/
 layout: null
+show_hero: false
 tags:
   - その他
   - day1
@@ -17,13 +18,19 @@ tags:
 <title>セレスと遊ぶ</title>
 <style>
   body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 20px;
     text-align: center;
     font-family: sans-serif;
     background-color: #f0f4f8;
   }
   #celes {
-    width: 200px;
+    display: block;
+    width: min(220px, 70vw);
+    margin: 24px auto 0;
     cursor: pointer;
+    transition: transform 100ms ease;
   }
   #message {
     margin-top: 20px;
