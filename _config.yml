@@ -2,7 +2,7 @@ title: Lazulite
 description: 小説、イラスト、動画、その他の創作をまとめて置いておく場所。
 lang: ja
 url: https://lazulite-ouka.github.io
-baseurl: /log
+baseurl: ""
 
 collections:
   works:
