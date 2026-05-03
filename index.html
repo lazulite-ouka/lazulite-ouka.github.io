@@ -1,0 +1,112 @@
+---
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ site.title }}</title>
+    <meta
+      name="description"
+      content="{{ site.description }}"
+    />
+    <link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Creative Archive</p>
+        <h1>Lazulite</h1>
+        <p id="site-subtitle" class="lead">
+          小説、イラスト、動画、その他の創作をまとめて置いておく場所。
+        </p>
+      </div>
+      <nav class="quick-nav" aria-label="主要リンク">
+        <a href="#novel">小説</a>
+        <a href="#illustration">イラスト</a>
+        <a href="#video">動画</a>
+        <a href="#other">その他</a>
+      </nav>
+    </header>
+
+    {% assign works = site.works | sort: "date" | reverse %}
+    {% assign novels = works | where: "category", "novel" %}
+    {% assign illustrations = works | where: "category", "illustration" %}
+    {% assign videos = works | where: "category", "video" %}
+    {% assign others = works | where: "category", "other" %}
+
+    <main class="archive-shell">
+      <section class="summary-panel" aria-label="概要">
+        <div>
+          <span class="summary-number">{{ works | size }}</span>
+          <span class="summary-label">作品</span>
+        </div>
+        <div>
+          <span class="summary-number">{{ novels | size }}</span>
+          <span class="summary-label">小説</span>
+        </div>
+        <div>
+          <span class="summary-number">{{ illustrations | size }}</span>
+          <span class="summary-label">イラスト</span>
+        </div>
+        <div>
+          <span class="summary-number">{{ videos | size }}</span>
+          <span class="summary-label">動画</span>
+        </div>
+        <div>
+          <span class="summary-number">{{ others | size }}</span>
+          <span class="summary-label">その他</span>
+        </div>
+      </section>
+
+      {% assign groups = "novel:小説,illustration:イラスト,video:動画,other:その他" | split: "," %}
+      {% for group in groups %}
+        {% assign group_parts = group | split: ":" %}
+        {% assign group_key = group_parts[0] %}
+        {% assign group_label = group_parts[1] %}
+        {% assign group_works = works | where: "category", group_key %}
+        <section class="work-section" id="{{ group_key }}">
+          <div class="section-heading">
+            <p class="eyebrow">{{ group_label }}</p>
+            <h2>{{ group_label }}</h2>
+          </div>
+
+          {% if group_works.size > 0 %}
+            <div class="works-grid">
+              {% for work in group_works %}
+                <a class="work-card" href="{{ work.url | relative_url }}">
+                  {% if work.cover %}
+                    <img src="{{ work.cover | relative_url }}" alt="{{ work.title }}のサムネイル" loading="lazy" />
+                  {% else %}
+                    <img src="{{ '/assets/images/sample-novel.png' | relative_url }}" alt="{{ work.title }}のサムネイル" loading="lazy" />
+                  {% endif %}
+                  <span class="card-body">
+                    <span class="type-row">
+                      <span class="type-badge {{ work.category }}">{{ group_label }}</span>
+                      {% if work.date %}
+                        <time datetime="{{ work.date | date_to_xmlschema }}">{{ work.date | date: "%Y.%m.%d" }}</time>
+                      {% endif %}
+                    </span>
+                    <strong>{{ work.title }}</strong>
+                    {% if work.description %}
+                      <span class="card-description">{{ work.description }}</span>
+                    {% endif %}
+                    {% if work.tags %}
+                      <span class="tags">
+                        {% for tag in work.tags %}
+                          <span class="tag">#{{ tag }}</span>
+                        {% endfor %}
+                      </span>
+                    {% endif %}
+                  </span>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-message">まだ作品がありません。</p>
+          {% endif %}
+        </section>
+      {% endfor %}
+    </main>
+  </body>
+</html>
