@@ -1,0 +1,244 @@
+---
+title: セラとじゃんけん
+category: other
+date: 2026-05-05
+description: セラとじゃんけんで遊ぶ小さなHTML作品です。
+cover: /assets/uploads/day2-sera_wait.png
+permalink: /works/day2/
+layout: null
+show_hero: false
+tags:
+  - その他
+  - day2
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セラとじゃんけん</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff7ee;
+        --surface: #ffffff;
+        --ink: #2d2722;
+        --muted: #7a6b5f;
+        --line: #ead8c4;
+        --accent: #bd6f3f;
+        --accent-dark: #8d4e28;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        width: min(720px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        text-align: center;
+      }
+
+      .home-link {
+        display: inline-flex;
+        min-height: 36px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--muted);
+        padding: 5px 12px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 22px 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .game-panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(105, 76, 46, 0.12);
+      }
+
+      #seraImage {
+        display: block;
+        width: min(300px, 72vw);
+        height: auto;
+        margin: 0 auto 20px;
+      }
+
+      .prompt {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .hand-buttons,
+      .again-area {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      button {
+        min-width: 112px;
+        min-height: 44px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 16px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.72;
+      }
+
+      #result {
+        min-height: 74px;
+        margin: 22px 0 0;
+        color: var(--ink);
+        font-size: 1.18rem;
+        font-weight: 800;
+        white-space: pre-line;
+      }
+
+      .again-area {
+        display: none;
+        margin-top: 14px;
+      }
+
+      .again-area.is-visible {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="home-link" href="/">Lazuliteへ戻る</a>
+      <h1>セラとじゃんけん</h1>
+      <p class="lead">手を選んで、セラと勝負します。</p>
+
+      <section class="game-panel" aria-label="じゃんけん">
+        <img id="seraImage" src="/assets/uploads/day2-sera_wait.png" alt="セラ">
+
+        <p class="prompt">手を選んでください</p>
+        <div class="hand-buttons" id="handButtons">
+          <button type="button" data-hand="グー">グー</button>
+          <button type="button" data-hand="チョキ">チョキ</button>
+          <button type="button" data-hand="パー">パー</button>
+        </div>
+
+        <div id="result" aria-live="polite">セラ「じゃーんけーん！」</div>
+
+        <div class="again-area" id="againArea">
+          <button type="button" id="againButton">もう一回</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const imageBase = "/assets/uploads/";
+      const hands = [
+        { name: "グー", image: "day2-sera_gu.png" },
+        { name: "チョキ", image: "day2-sera_choki.png" },
+        { name: "パー", image: "day2-sera_pa.png" },
+      ];
+
+      const image = document.getElementById("seraImage");
+      const handButtons = document.getElementById("handButtons");
+      const againArea = document.getElementById("againArea");
+      const againButton = document.getElementById("againButton");
+      const result = document.getElementById("result");
+
+      function setImage(fileName) {
+        image.src = imageBase + fileName;
+      }
+
+      function setButtonsDisabled(disabled) {
+        handButtons.querySelectorAll("button").forEach((button) => {
+          button.disabled = disabled;
+        });
+      }
+
+      function play(player) {
+        const sera = hands[Math.floor(Math.random() * hands.length)];
+
+        setButtonsDisabled(true);
+        againArea.classList.remove("is-visible");
+        setImage(sera.image);
+        result.innerText = "セラ「……ぽん！」";
+
+        setTimeout(() => {
+          let message = "";
+
+          if (player === sera.name) {
+            message = "あいこ！";
+            setImage("day2-sera_draw.png");
+          } else if (
+            (player === "グー" && sera.name === "チョキ") ||
+            (player === "チョキ" && sera.name === "パー") ||
+            (player === "パー" && sera.name === "グー")
+          ) {
+            message = "あなたの勝ち！";
+            setImage("day2-sera_lose.png");
+          } else {
+            message = "セラの勝ち！";
+            setImage("day2-sera_win.png");
+          }
+
+          result.innerText = `セラは「${sera.name}」を出した！\n${message}`;
+          againArea.classList.add("is-visible");
+        }, 800);
+      }
+
+      function resetGame() {
+        setImage("day2-sera_wait.png");
+        result.innerText = "セラ「じゃーんけーん！」";
+        setButtonsDisabled(false);
+        againArea.classList.remove("is-visible");
+      }
+
+      handButtons.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-hand]");
+        if (!button || button.disabled) return;
+        play(button.dataset.hand);
+      });
+
+      againButton.addEventListener("click", resetGame);
+    </script>
+  </body>
+</html>
