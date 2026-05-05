@@ -59,6 +59,12 @@
         <div class="prose">
           {{ content }}
         </div>
+
+        {% if page.external_url %}
+          <p class="work-actions">
+            <a class="action-link" href="{{ page.external_url }}" target="_blank" rel="noreferrer">外部ページを開く</a>
+          </p>
+        {% endif %}
       </article>
     </main>
   </body>
