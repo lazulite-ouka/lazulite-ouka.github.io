@@ -18,7 +18,7 @@
         <p class="eyebrow">Creative Archive</p>
         <h1>Lazulite</h1>
         <p id="site-subtitle" class="lead">
-          小説、イラスト、動画、その他の創作をまとめて置いておく場所。
+          小説、イラスト、その他の創作をまとめて置いておく場所。
         </p>
       </div>
       <nav class="quick-nav" aria-label="主要リンク">
@@ -34,7 +34,7 @@
     {% assign others = works | where: "category", "other" %}
 
     <main class="archive-shell">
-      <section class="summary-panel" aria-label="概要">
+      <section class="summary-panel summary-panel-three" aria-label="概要">
         <div>
           <span class="summary-number">{{ works | size }}</span>
           <span class="summary-label">作品</span>
@@ -59,6 +59,7 @@
         {% assign group_key = group_parts[0] %}
         {% assign group_label = group_parts[1] %}
         {% assign group_works = works | where: "category", group_key %}
+        {% assign fallback_cover = "/assets/images/sample-" | append: group_key | append: ".png" %}
         <section class="work-section" id="{{ group_key }}">
           <div class="section-heading">
             <p class="eyebrow">{{ group_label }}</p>
@@ -72,7 +73,7 @@
                   {% if work.cover %}
                     <img src="{{ work.cover | relative_url }}" alt="{{ work.title }}のサムネイル" loading="lazy" />
                   {% else %}
-                    <img src="{{ '/assets/images/sample-novel.png' | relative_url }}" alt="{{ work.title }}のサムネイル" loading="lazy" />
+                    <img src="{{ fallback_cover | relative_url }}" alt="{{ work.title }}のサムネイル" loading="lazy" />
                   {% endif %}
                   <span class="card-body">
                     <span class="type-row">
