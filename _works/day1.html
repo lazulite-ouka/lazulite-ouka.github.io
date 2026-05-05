@@ -1,0 +1,81 @@
+---
+title: セレスにかまう
+category: other
+date: 2026-05-02
+description: クリックするとセレスのセリフが変わる小さな作品です。
+cover: /assets/uploads/day1-celes.png
+permalink: /works/day1/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セレス
+---
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>セレスにかまう</title>
+<style>
+  body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 20px;
+    text-align: center;
+    font-family: sans-serif;
+    background-color: #f0f4f8;
+  }
+  #celes {
+    display: block;
+    width: min(220px, 70vw);
+    margin: 24px auto 0;
+    cursor: pointer;
+    transition: transform 100ms ease;
+  }
+  #message {
+    margin-top: 20px;
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>セレスにかまう</h1>
+
+<img id="celes" src="/assets/uploads/day1-celes.png" alt="セレス">
+
+<div id="message">……何？</div>
+
+<script>
+let count = 0;
+
+const messages = [
+  "なに？暇なの？",
+  "触らないでくれる？",
+  "……しつこいね",
+  "別に、嫌じゃないけど",
+  "セラみたいなことするね、君",
+  "セラのところにでも行ったら？",
+  "君、変わってるね。嫌いじゃないよ",
+  "……もう行くの？",
+  "……別に、いいけど"
+];
+
+const celes = document.getElementById("celes");
+
+celes.onclick = function() {
+  count++;
+
+  // セリフ変更
+  let index = Math.min(count, messages.length - 1);
+  document.getElementById("message").innerText = messages[index];
+
+  // 揺れ処理
+  celes.style.transform = "translateX(2px)";
+  setTimeout(() => {
+    celes.style.transform = "translateX(0px)";
+  }, 100);
+};
+</script>
+</body>
+</html>
