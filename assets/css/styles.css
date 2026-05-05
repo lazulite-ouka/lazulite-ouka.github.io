@@ -112,7 +112,7 @@ h1 {
 
 .summary-panel {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -222,11 +222,6 @@ h1 {
   color: var(--rose);
 }
 
-.type-badge.video {
-  background: #edf2f8;
-  color: var(--blue);
-}
-
 .type-badge.other {
   background: #f7eedf;
   color: var(--gold);
@@ -316,6 +311,29 @@ h1 {
 
 .prose a {
   color: var(--accent-dark);
+  font-weight: 800;
+}
+
+.prose img {
+  height: auto;
+  margin: 20px auto;
+  border-radius: 8px;
+}
+
+.work-actions {
+  margin: 24px 0 0;
+}
+
+.action-link {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #ffffff;
+  padding: 8px 14px;
+  text-decoration: none;
   font-weight: 800;
 }
 
