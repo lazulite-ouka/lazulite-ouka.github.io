@@ -1,15 +1,15 @@
 ---
-title: セラの見えるじゃんけん
+title: セラとじゃんけん2
 category: other
 date: 2026-05-05
-description: セラが出す手の予告イラストを見てから勝負する、少しずるいじゃんけんゲームです。
+description: セラとじゃんけんを何回もしているうちに、セラが次に何を出すのか分かるようになりました。
 cover: /assets/uploads/day3-sera_choki_wait.png
 permalink: /works/day3/
 layout: null
 show_hero: false
 tags:
   - その他
-  - day3
+  - セラ
   - ミニゲーム
 ---
 <!doctype html>
@@ -17,7 +17,7 @@ tags:
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>セラの見えるじゃんけん</title>
+    <title>セラとじゃんけん2</title>
     <style>
       :root {
         color-scheme: light;
@@ -232,8 +232,8 @@ tags:
         setButtonsDisabled(true);
         againArea.classList.remove("is-visible");
         setImage(seraHand.handImage, `${seraHand.name}を出したセラ`);
-        hint.innerText = "セラ「……ぽん！」";
-        result.innerText = `セラは「${seraHand.name}」を出した！`;
+        hint.innerText = "";
+        result.innerText = `セラ「……ぽん！」\nセラは「${seraHand.name}」を出した！`;
 
         const outcome = getOutcome(player, seraHand.name);
 
@@ -246,9 +246,9 @@ tags:
             result.innerText = `セラは「${seraHand.name}」を出した！\nあなたの勝ち！`;
           } else {
             setImage("day2-sera_win.png", "勝ったセラ");
-            result.innerText = `セラは「${seraHand.name}」を出した！\nセラの勝ち！`;
+            result.innerText = `セラは「${seraHand.name}」を出した！\nセラの勝ち！`\n\nセラ「やったー！セレス、勝ったよ！」\nセレス「……優しいんだね、きみ」;
           }
-          hint.innerText = "結果発表！";
+          hint.innerText = "";
           againArea.classList.add("is-visible");
         }, 700);
       }
