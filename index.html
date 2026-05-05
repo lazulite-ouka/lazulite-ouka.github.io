@@ -24,7 +24,6 @@
       <nav class="quick-nav" aria-label="主要リンク">
         <a href="#novel">小説</a>
         <a href="#illustration">イラスト</a>
-        <a href="#video">動画</a>
         <a href="#other">その他</a>
       </nav>
     </header>
@@ -32,7 +31,6 @@
     {% assign works = site.works | sort: "date" | reverse %}
     {% assign novels = works | where: "category", "novel" %}
     {% assign illustrations = works | where: "category", "illustration" %}
-    {% assign videos = works | where: "category", "video" %}
     {% assign others = works | where: "category", "other" %}
 
     <main class="archive-shell">
@@ -50,16 +48,12 @@
           <span class="summary-label">イラスト</span>
         </div>
         <div>
-          <span class="summary-number">{{ videos | size }}</span>
-          <span class="summary-label">動画</span>
-        </div>
-        <div>
           <span class="summary-number">{{ others | size }}</span>
           <span class="summary-label">その他</span>
         </div>
       </section>
 
-      {% assign groups = "novel:小説,illustration:イラスト,video:動画,other:その他" | split: "," %}
+      {% assign groups = "novel:小説,illustration:イラスト,other:その他" | split: "," %}
       {% for group in groups %}
         {% assign group_parts = group | split: ":" %}
         {% assign group_key = group_parts[0] %}
