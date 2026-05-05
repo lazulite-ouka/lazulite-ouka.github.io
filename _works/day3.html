@@ -5,7 +5,7 @@ date: 2026-05-05
 description: セラとじゃんけんを何回もしているうちに、セラが次に何を出すのか分かるようになりました。
 cover: /assets/uploads/day3-sera_choki_wait.png
 permalink: /works/day3/
-layout: null
+layout: none
 show_hero: false
 tags:
   - その他
@@ -141,7 +141,7 @@ tags:
   <body>
     <main>
       <h1>セラの見えるじゃんけん</h1>
-      <p class="lead">セラが出す手は、もう見えています。</p>
+      <p class="lead">セレス「負けてあげると喜ぶかもね」</p>
 
       <section class="game-panel" aria-label="見えるじゃんけん">
         <img id="seraImage" src="/assets/uploads/day3-sera_gu_wait.png" alt="グーを出そうとしているセラ">
@@ -246,7 +246,7 @@ tags:
             result.innerText = `セラは「${seraHand.name}」を出した！\nあなたの勝ち！`;
           } else {
             setImage("day2-sera_win.png", "勝ったセラ");
-            result.innerText = `セラは「${seraHand.name}」を出した！\nセラの勝ち！`\n\nセラ「やったー！セレス、勝ったよ！」\nセレス「……優しいんだね、きみ」;
+            result.innerText = `セラは「${seraHand.name}」を出した！\nセラの勝ち！\n\nセラ「やったー！セレス、勝ったよ！」\nセレス「……優しいんだね、きみ」`;
           }
           hint.innerText = "";
           againArea.classList.add("is-visible");
