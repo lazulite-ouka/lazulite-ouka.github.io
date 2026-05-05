@@ -1,0 +1,304 @@
+---
+title: セラにプレゼント
+category: other
+date: 2026-05-05
+description: ランダムに出る二択から、セラへ贈るプレゼントを選ぶ小さなゲームです。
+cover: /assets/images/sample-other.png
+permalink: /works/day6/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セラ
+  - セレス
+  - day6
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セラにプレゼント</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff7ee;
+        --surface: #ffffff;
+        --ink: #2d2722;
+        --muted: #7a6b5f;
+        --line: #ead8c4;
+        --accent: #bd6f3f;
+        --accent-dark: #8d4e28;
+        --soft: #fbefe3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        width: min(760px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .game-panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(105, 76, 46, 0.12);
+      }
+
+      .set-label {
+        margin: 0 0 14px;
+        color: var(--accent-dark);
+        font-weight: 800;
+      }
+
+      .gift-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 18px 0 0;
+      }
+
+      button {
+        min-height: 58px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 10px 14px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+        color: var(--accent-dark);
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.72;
+      }
+
+      .dialogue {
+        display: grid;
+        gap: 10px;
+        margin-top: 22px;
+        text-align: left;
+      }
+
+      .line {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 14px;
+      }
+
+      .speaker {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+
+      .result {
+        margin: 18px 0 0;
+        color: var(--accent-dark);
+        font-weight: 800;
+      }
+
+      @media (max-width: 620px) {
+        .gift-buttons {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>セラにプレゼント</h1>
+      <p class="lead">出てきた二択から、セラに贈るものを一つだけ選びます。</p>
+
+      <section class="game-panel" aria-label="プレゼント選び">
+        <p class="set-label" id="setLabel">候補を用意しています</p>
+        <p id="prompt">セラ「セラにくれるの？なになに？」</p>
+
+        <div class="gift-buttons" id="giftButtons"></div>
+
+        <div class="dialogue" id="dialogue" aria-live="polite"></div>
+        <p class="result" id="result"></p>
+      </section>
+    </main>
+
+    <script>
+      // AからEの候補です。ページを開くたび、この中から1組だけ出ます。
+      const giftSets = [
+        {
+          label: "A",
+          options: [
+            {
+              name: "リボン",
+              target: "sera",
+              sera: "わあ、かわいい！セラ、これつけていい？",
+              celes: "……似合うんじゃない。僕に聞くことでもないけど。",
+            },
+            {
+              name: "難しい本",
+              target: "celes",
+              sera: "むずかしそう……セラ、寝ちゃうかも。",
+              celes: "こっちに渡しなよ。セラに持たせるには重すぎる。",
+            },
+          ],
+        },
+        {
+          label: "B",
+          options: [
+            {
+              name: "甘いお菓子",
+              target: "sera",
+              sera: "甘いやつだ！セラ、こういうの好き！",
+              celes: "……分かりやすいね。まあ、喜んでるならいい。",
+            },
+            {
+              name: "辛いお菓子",
+              target: "celes",
+              sera: "からいの？セラ、ちょっとこわい……。",
+              celes: "無理に食べさせない。僕が預かる。判断としては遅いけどね。",
+            },
+          ],
+        },
+        {
+          label: "C",
+          options: [
+            {
+              name: "ふわふわのぬいぐるみ",
+              target: "sera",
+              sera: "ふわふわ！ぎゅってしていい？",
+              celes: "……壊さない程度にね。君は加減が雑だから。",
+            },
+            {
+              name: "古い辞書",
+              target: "celes",
+              sera: "じしょ？えっと……枕には固いね。",
+              celes: "枕にするな。僕が読む。セラにはまだ早い。",
+            },
+          ],
+        },
+        {
+          label: "D",
+          options: [
+            {
+              name: "花束",
+              target: "sera",
+              sera: "お花だ！きれい！セレスにも見せたい！",
+              celes: "今もう見てる。……はしゃぎすぎ。",
+            },
+            {
+              name: "謎の石",
+              target: "celes",
+              sera: "石？えへへ、どうしたらいいのかな。",
+              celes: "困らせてるじゃないか。貸して。調べるくらいはする。",
+            },
+          ],
+        },
+        {
+          label: "E",
+          options: [
+            {
+              name: "セレスのしおり",
+              target: "sera",
+              sera: "セレスの！？セラ、宝物にする！",
+              celes: "……僕の名前で喜ばないで。扱いは丁寧に。",
+            },
+            {
+              name: "高級万年筆",
+              target: "celes",
+              sera: "きれいだけど、セラが使ったらインクで大変なことになるよ。",
+              celes: "分かってるなら触らない。僕が使う。……悪くはない。",
+            },
+          ],
+        },
+      ];
+
+      const setLabel = document.getElementById("setLabel");
+      const prompt = document.getElementById("prompt");
+      const giftButtons = document.getElementById("giftButtons");
+      const dialogue = document.getElementById("dialogue");
+      const result = document.getElementById("result");
+
+      // 今回表示する候補をランダムに1つ決めます。
+      const currentSet = giftSets[Math.floor(Math.random() * giftSets.length)];
+
+      function renderChoices() {
+        setLabel.innerText = `候補 ${currentSet.label}`;
+        giftButtons.innerHTML = "";
+
+        currentSet.options.forEach((gift) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.innerText = gift.name;
+          button.addEventListener("click", () => chooseGift(gift));
+          giftButtons.append(button);
+        });
+      }
+
+      function addLine(speaker, text) {
+        const line = document.createElement("div");
+        line.className = "line";
+        line.innerHTML = `<span class="speaker">${speaker}</span>${text}`;
+        dialogue.append(line);
+      }
+
+      function chooseGift(gift) {
+        // プレゼントは1回だけなので、選んだらボタンを押せないようにします。
+        giftButtons.querySelectorAll("button").forEach((button) => {
+          button.disabled = true;
+        });
+
+        prompt.innerText = `あなたは「${gift.name}」を選んだ。`;
+        dialogue.innerHTML = "";
+
+        if (gift.target === "sera") {
+          addLine("セラ", `セラ「${gift.sera}」`);
+          addLine("セレス", `セレス「${gift.celes}」`);
+          result.innerText = "セラは素直に喜んでいる。";
+        } else {
+          addLine("セラ", `セラ「${gift.sera}」`);
+          addLine("セレス", `セレス「${gift.celes}」`);
+          result.innerText = "そのプレゼントは、セレスの方へ渡った。";
+        }
+      }
+
+      renderChoices();
+    </script>
+  </body>
+</html>

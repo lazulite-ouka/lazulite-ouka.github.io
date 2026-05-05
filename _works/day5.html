@@ -1,0 +1,203 @@
+---
+title: セレスと話す
+category: other
+date: 2026-05-05
+description: 一方的に話しても返事をしてくれないセレス。
+cover: /assets/uploads/day4-celes2.png
+permalink: /works/day5/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セレス
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セレスと話す</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --ink: #222831;
+        --muted: #687180;
+        --line: #dce2ea;
+        --accent: #6aa6ff;
+        --accent-dark: #3f78c9;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        width: min(680px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(51, 70, 94, 0.1);
+      }
+
+      #celesImage {
+        display: block;
+        width: min(260px, 72vw);
+        height: auto;
+        margin: 0 auto 20px;
+        transition: opacity 180ms ease;
+      }
+
+      .status {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      button {
+        min-width: 132px;
+        min-height: 44px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 16px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      button.is-hidden {
+        display: none;
+      }
+
+      #message {
+        min-height: 72px;
+        margin: 22px 0 0;
+        color: var(--ink);
+        font-size: 1.15rem;
+        font-weight: 800;
+        white-space: pre-line;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>セレスと話す</h1>
+      <p class="lead">こちらから話しかけても、セレスはなかなか返事をしてくれません。</p>
+
+      <section class="panel" aria-label="セレスとの沈黙">
+        <img id="celesImage" src="/assets/uploads/day1-celes.png" alt="セレス">
+
+        <p class="status" id="status">セラ「セレスはね、側でじっとしてたら話しかけてくれたりするよ」</p>
+        <button type="button" id="talkButton">話しかける</button>
+
+        <div id="message" aria-live="polite">……</div>
+      </section>
+    </main>
+
+    <script>
+      const imageBase = "/assets/uploads/";
+      const idleDelay = 5000;
+      const silentImage = "day1-celes.png";
+      const speakingImage = "day4-celes2.png";
+      const proactiveLines = [
+        "……まだいるの？",
+        "……まあ、少しなら付き合ってあげる",
+        "君、ほんとに暇なんだね。……僕もだけど",
+        "……別に嫌じゃないよ",
+        "……もう少しだけならいいよ",
+        "君といると、退屈はしないね",
+        "この本？君にはまだ難しいんじゃない？",
+        "……冗談だよ。機会があったら今度、本の話をしよう",
+        "君の意見も聞いてみたい",
+        "でも、今日はもうおしまい",
+        "またね",
+      ];
+
+      const image = document.getElementById("celesImage");
+      const status = document.getElementById("status");
+      const message = document.getElementById("message");
+      const talkButton = document.getElementById("talkButton");
+
+      let idleTimer = null;
+      let lineIndex = 0;
+
+      function setImage(fileName, alt) {
+        const nextSrc = imageBase + fileName;
+        if (image.getAttribute("src") === nextSrc) {
+          image.alt = alt;
+          return;
+        }
+
+        image.style.opacity = "0.72";
+        window.setTimeout(() => {
+          image.src = nextSrc;
+          image.alt = alt;
+          image.style.opacity = "1";
+        }, 120);
+      }
+
+      function nextLine() {
+        const line = proactiveLines[Math.min(lineIndex, proactiveLines.length - 1)];
+        if (lineIndex < proactiveLines.length - 1) lineIndex += 1;
+        return line;
+      }
+
+      function scheduleCelesTalk() {
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(() => {
+          setImage(speakingImage, "話しかけてくるセレス");
+          talkButton.classList.add("is-hidden");
+          status.innerText = "";
+          message.innerText = nextLine();
+          scheduleCelesTalk();
+        }, idleDelay);
+      }
+
+      function talk() {
+        setImage(silentImage, "セレス");
+        status.innerText = "";
+        message.innerText = "……";
+        scheduleCelesTalk();
+      }
+
+      talkButton.addEventListener("click", talk);
+      scheduleCelesTalk();
+    </script>
+  </body>
+</html>

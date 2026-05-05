@@ -1,0 +1,384 @@
+---
+title: セレスと哲学問答
+category: other
+date: 2026-05-05
+description: セレスと二択で哲学問答をする、5ラリーの短い会話ゲームです。
+cover: /assets/uploads/day4-celes2.png
+permalink: /works/day7/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セレス
+  - day7
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セレスと哲学問答</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --ink: #222831;
+        --muted: #687180;
+        --line: #dce2ea;
+        --accent: #6aa6ff;
+        --accent-dark: #3f78c9;
+        --soft: #eef5ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        width: min(760px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(51, 70, 94, 0.1);
+      }
+
+      #celesImage {
+        display: block;
+        width: min(260px, 72vw);
+        height: auto;
+        margin: 0 auto 20px;
+      }
+
+      .progress {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      .question {
+        margin: 0;
+        font-size: 1.18rem;
+        font-weight: 800;
+      }
+
+      .choice-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 58px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 10px 14px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+        color: var(--accent-dark);
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.72;
+      }
+
+      .dialogue {
+        display: grid;
+        gap: 10px;
+        margin-top: 22px;
+        text-align: left;
+      }
+
+      .line {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 14px;
+      }
+
+      .speaker {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+
+      .affection-wrap {
+        width: min(360px, 100%);
+        height: 18px;
+        overflow: hidden;
+        margin: 22px auto 0;
+        border-radius: 999px;
+        background: #dce2ea;
+      }
+
+      #affectionBar {
+        height: 100%;
+        width: 50%;
+        border-radius: inherit;
+        background: var(--accent);
+        transition: width 240ms ease;
+      }
+
+      @media (max-width: 620px) {
+        .choice-buttons {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>セレスと哲学問答</h1>
+      <p class="lead">セレスの問いに、二択で答えます。</p>
+
+      <section class="panel" aria-label="哲学問答">
+        <img id="celesImage" src="/assets/uploads/day1-celes.png" alt="セレス">
+
+        <p class="progress" id="progress"></p>
+        <p class="question" id="question"></p>
+
+        <div class="choice-buttons" id="choiceButtons"></div>
+        <div class="dialogue" id="dialogue" aria-live="polite"></div>
+
+        <div class="affection-wrap" aria-hidden="true">
+          <div id="affectionBar"></div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // 好感度は0から始まります。現実的な答えほど上がります。
+      let affection = 0;
+      let currentIndex = 0;
+
+      // ここを書き換えると、問答の内容を変えられます。
+      const questions = [
+        {
+          question: "人を救うのは、善いことだと思う？",
+          choices: [
+            {
+              text: "いつでも善いこと",
+              score: -1,
+              reply: "耳触りはいいね。けど、助け方を間違えれば首輪にもなる。",
+              after: "山で拾った子に、善意の形だけ押しつけても意味はない。",
+            },
+            {
+              text: "救い方による",
+              score: 1,
+              reply: "現実的だね。少なくとも、きれいごとで済ませるよりはまし。",
+              after: "拾ったなら、拾った後の面倒まで見る。それくらいは当然だ。",
+            },
+          ],
+        },
+        {
+          question: "待ち続けることに、価値はあると思う？",
+          choices: [
+            {
+              text: "信じるなら価値がある",
+              score: -1,
+              reply: "信じるだけで腹が満ちるなら、誰も路地裏で眠らない。",
+              after: "迎えに来ると言われて、ずっと山を見ている子もいる。……笑えない話だ。",
+            },
+            {
+              text: "動けるなら動くべき",
+              score: 1,
+              reply: "そう。待つのは選択肢がない時だけでいい。",
+              after: "だから僕は連れて帰った。親切じゃない。放置が不合理だっただけ。",
+            },
+          ],
+        },
+        {
+          question: "人の価値は、出自で決まると思う？",
+          choices: [
+            {
+              text: "出自は関係ない",
+              score: 1,
+              reply: "理想論に聞こえるけど、今回は同意しておく。",
+              after: "捨てられた場所で値札が決まるなら、僕は最初から不良品だ。",
+            },
+            {
+              text: "少しは影響する",
+              score: 0,
+              reply: "影響はする。決定ではない。そこを混ぜると、雑な差別になる。",
+              after: "僕の顔は母親由来らしい。そこだけは、まあ、感謝してもいい。",
+            },
+          ],
+        },
+        {
+          question: "真実は、いつも優しさより優先されるべき？",
+          choices: [
+            {
+              text: "真実を優先するべき",
+              score: 1,
+              reply: "痛くても、現実を見ないと次の手は選べない。",
+              after: "ただし、相手が受け取れる形にはする。セラに全部そのまま投げても壊れるだけだ。",
+            },
+            {
+              text: "優しさを優先するべき",
+              score: -1,
+              reply: "優しい嘘は便利だね。使う側が気持ちよくなれる。",
+              after: "僕は嫌いだ。……でも、セラ相手だと黙る時はある。",
+            },
+          ],
+        },
+        {
+          question: "誰かに依存することは、弱さだと思う？",
+          choices: [
+            {
+              text: "弱さだと思う",
+              score: 0,
+              reply: "半分正しい。依存は判断を鈍らせる。",
+              after: "それでも、完全に一人で立てる人間なんて、たぶん空想上の生き物だ。",
+            },
+            {
+              text: "生きるための形だと思う",
+              score: 1,
+              reply: "……言い方は甘いけど、外れてはいない。",
+              after: "セラは僕に懐いている。僕は世話をしている。名前を付けると面倒になる関係だ。",
+            },
+          ],
+        },
+      ];
+
+      const endings = {
+        high: [
+          "……君、思ったより現実が見えてるね。",
+          "褒めてはいない。少し話が通じる、というだけ。",
+          "また聞くかもしれない。暇だったらね。",
+        ],
+        middle: [
+          "悪くはない。けど、考えた気になって止まるのが一番危ない。",
+          "答えは持ち歩くものじゃない。状況ごとに使い直すものだ。",
+          "……まあ、退屈ではなかったよ。",
+        ],
+        low: [
+          "優しい答えが多いね。耳触りはいい。",
+          "でも、それで寒さはしのげない。空腹も消えない。",
+          "……否定はしない。足りないと言ってるだけ。",
+        ],
+      };
+
+      const imageBase = "/assets/uploads/";
+      const celesImage = document.getElementById("celesImage");
+      const progress = document.getElementById("progress");
+      const question = document.getElementById("question");
+      const choiceButtons = document.getElementById("choiceButtons");
+      const dialogue = document.getElementById("dialogue");
+      const affectionBar = document.getElementById("affectionBar");
+
+      function updateAffectionBar() {
+        const percent = Math.max(0, Math.min(100, 50 + affection * 10));
+        affectionBar.style.width = `${percent}%`;
+      }
+
+      function addLine(speaker, text) {
+        const line = document.createElement("div");
+        line.className = "line";
+        line.innerHTML = `<span class="speaker">${speaker}</span>${text}`;
+        dialogue.append(line);
+      }
+
+      function renderQuestion() {
+        const item = questions[currentIndex];
+        progress.innerText = `${currentIndex + 1} / ${questions.length}`;
+        question.innerText = item.question;
+        choiceButtons.innerHTML = "";
+        dialogue.innerHTML = "";
+        celesImage.src = imageBase + "day1-celes.png";
+
+        item.choices.forEach((choice) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.innerText = choice.text;
+          button.addEventListener("click", () => chooseAnswer(choice));
+          choiceButtons.append(button);
+        });
+      }
+
+      function chooseAnswer(choice) {
+        affection += choice.score;
+        updateAffectionBar();
+
+        choiceButtons.querySelectorAll("button").forEach((button) => {
+          button.disabled = true;
+        });
+
+        celesImage.src = imageBase + (choice.score > 0 ? "day4-celes2.png" : "day1-celes.png");
+        dialogue.innerHTML = "";
+        addLine("あなた", choice.text);
+        addLine("セレス", choice.reply);
+        addLine("セレス", choice.after);
+
+        const nextButton = document.createElement("button");
+        nextButton.type = "button";
+        nextButton.innerText = currentIndex === questions.length - 1 ? "最後の答えを聞く" : "次の問いへ";
+        nextButton.addEventListener("click", goNext);
+        choiceButtons.append(nextButton);
+      }
+
+      function goNext() {
+        currentIndex += 1;
+        if (currentIndex >= questions.length) {
+          showEnding();
+        } else {
+          renderQuestion();
+        }
+      }
+
+      function showEnding() {
+        question.innerText = "問答は終わった。";
+        progress.innerText = "結果";
+        choiceButtons.innerHTML = "";
+        dialogue.innerHTML = "";
+        celesImage.src = imageBase + (affection >= 3 ? "day4-celes2.png" : "day1-celes.png");
+
+        const ending = affection >= 3 ? endings.high : affection >= 0 ? endings.middle : endings.low;
+        ending.forEach((text) => addLine("セレス", text));
+      }
+
+      updateAffectionBar();
+      renderQuestion();
+    </script>
+  </body>
+</html>

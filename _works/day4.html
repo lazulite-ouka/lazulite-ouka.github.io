@@ -1,0 +1,275 @@
+---
+title: セレスにかまう2
+category: other
+date: 2026-05-05
+description: 話しかけると、セレスの機嫌が少しずつ上下します。
+cover: /assets/uploads/day4-celes2.png
+permalink: /works/day4/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セレス
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セレスにかまう2</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --ink: #222831;
+        --muted: #687180;
+        --line: #dce2ea;
+        --accent: #6aa6ff;
+        --accent-dark: #3f78c9;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        width: min(680px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(51, 70, 94, 0.1);
+      }
+
+      #celesImage {
+        display: block;
+        width: min(260px, 72vw);
+        height: auto;
+        margin: 0 auto 20px;
+      }
+
+      .mood-label {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      .bar-container {
+        width: min(360px, 100%);
+        height: 20px;
+        overflow: hidden;
+        margin: 0 auto 18px;
+        border-radius: 999px;
+        background: #dce2ea;
+      }
+
+      #bar {
+        height: 100%;
+        width: 50%;
+        border-radius: inherit;
+        background: var(--accent);
+        transition:
+          width 260ms ease,
+          background 260ms ease;
+      }
+
+      button {
+        min-width: 132px;
+        min-height: 44px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 16px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      #message {
+        min-height: 58px;
+        margin: 22px 0 0;
+        color: var(--ink);
+        font-size: 1.15rem;
+        font-weight: 800;
+        white-space: pre-line;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>セレスにかまう</h1>
+      <p class="lead">話しかけるたび、セレスの機嫌が少しずつ変わります。</p>
+
+      <section class="panel" aria-label="セレスの機嫌">
+        <img id="celesImage" src="/assets/uploads/day1-celes.png" alt="セレス">
+
+        <p class="mood-label" id="moodLabel">機嫌: 普通</p>
+        <div class="bar-container" aria-hidden="true">
+          <div id="bar"></div>
+        </div>
+
+        <button type="button" id="talkButton">話しかける</button>
+
+        <div id="message" aria-live="polite">……で、何？</div>
+      </section>
+    </main>
+
+    <script>
+      const imageBase = "/assets/uploads/";
+      const moodStages = [
+        {
+          name: "一番いい",
+          min: 96,
+          image: "day4-celes.png",
+          color: "#ff8fbd",
+          lines: ["……ほんと、物好きだね。"],
+        },
+        {
+          name: "高め",
+          min: 72,
+          image: "day4-celes2.png",
+          color: "#82b8ff",
+          lines: [
+            "……まあ、少しなら付き合ってあげる",
+            "君、ほんとに暇なんだね。……僕もだけど",
+            "……別に嫌じゃないよ",
+            "セラみたいなことするね、君",
+            "……もう少しだけならいいよ",
+            "君といると、退屈はしないね",
+          ],
+        },
+        {
+          name: "普通",
+          min: 42,
+          image: "day1-celes.png",
+          color: "#6aa6ff",
+          lines: [
+            "別にいいけど",
+            "……で、何？",
+            "何がしたいの？",
+            "僕に構っても面白くないと思うけど",
+            "……まあ、好きにすれば",
+            "君って変わってるね",
+          ],
+        },
+        {
+          name: "やや不機嫌",
+          min: 18,
+          image: "day1-celes.png",
+          color: "#8e9aaa",
+          lines: [
+            "……しつこい",
+            "今、読んでるんだけど",
+            "話しかけるタイミング考えたら？",
+            "ほんと、落ち着きないね",
+            "……セラの方がまだ静かだよ",
+          ],
+        },
+        {
+          name: "低め",
+          min: 0,
+          image: "day1-celes.png",
+          color: "#6f7480",
+          lines: [
+            "もうやめてくれる？",
+            "……いい加減にして",
+          ],
+        },
+      ];
+
+      const image = document.getElementById("celesImage");
+      const bar = document.getElementById("bar");
+      const moodLabel = document.getElementById("moodLabel");
+      const message = document.getElementById("message");
+      const talkButton = document.getElementById("talkButton");
+
+      let mood = 50;
+      let trend = 1;
+      let lastLine = "";
+
+      function getStage() {
+        return moodStages.find((stage) => mood >= stage.min);
+      }
+
+      function pickLine(lines) {
+        if (lines.length === 1) return lines[0];
+        let line = lines[Math.floor(Math.random() * lines.length)];
+        while (line === lastLine) {
+          line = lines[Math.floor(Math.random() * lines.length)];
+        }
+        lastLine = line;
+        return line;
+      }
+
+      function updateView(stage, line) {
+        image.src = imageBase + stage.image;
+        moodLabel.innerText = `機嫌: ${stage.name}`;
+        bar.style.width = `${mood}%`;
+        bar.style.background = stage.color;
+        message.innerText = line;
+      }
+
+      function changeMoodGradually() {
+        if (Math.random() < 0.32) trend *= -1;
+
+        const amount = 3 + Math.floor(Math.random() * 6);
+        mood += trend * amount;
+
+        if (mood >= 100) {
+          mood = 100;
+          trend = -1;
+        }
+
+        if (mood <= 0) {
+          mood = 0;
+          trend = 1;
+        }
+      }
+
+      function talk() {
+        changeMoodGradually();
+        const stage = getStage();
+        updateView(stage, pickLine(stage.lines));
+      }
+
+      talkButton.addEventListener("click", talk);
+
+      const initialStage = getStage();
+      updateView(initialStage, pickLine(initialStage.lines));
+    </script>
+  </body>
+</html>
