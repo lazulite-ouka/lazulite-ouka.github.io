@@ -3,6 +3,8 @@ description: 小説、イラスト、動画、その他の創作をまとめて�
 lang: ja
 url: https://lazulite-ouka.github.io
 baseurl: ""
+timezone: Asia/Tokyo
+future: true
 
 collections:
   works:
