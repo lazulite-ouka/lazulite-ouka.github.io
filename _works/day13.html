@@ -1,0 +1,349 @@
+---
+title: セラのおつかい報告
+category: other
+date: 2026-05-10 14:00:00 +0900
+description: セラにおつかいをお願いして、帰ってきた報告を聞くミニゲームです。
+cover: /assets/uploads/day2-sera_draw.png
+permalink: /works/day13/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セラ
+  - セレス
+  - day13
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セラのおつかい報告</title>
+
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff7ee;
+        --surface: #ffffff;
+        --ink: #2d2722;
+        --muted: #7a6b5f;
+        --line: #ead8c4;
+        --accent: #bd6f3f;
+        --accent-dark: #8d4e28;
+        --soft: #fbefe3;
+        --blue-soft: #eef5ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+        text-align: center;
+      }
+
+      main {
+        width: min(720px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 30px);
+        box-shadow: 0 16px 36px rgba(105, 76, 46, 0.12);
+      }
+
+      #seraImage {
+        display: block;
+        width: min(300px, 72vw);
+        height: auto;
+        margin: 0 auto 18px;
+      }
+
+      button {
+        min-width: min(260px, 100%);
+        min-height: 48px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 16px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      button:focus-visible {
+        outline: 3px solid rgba(189, 111, 63, 0.28);
+        outline-offset: 2px;
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.58;
+      }
+
+      .status {
+        min-height: 1.7em;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .attempt {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      .bar-wrap {
+        width: min(360px, 100%);
+        height: 14px;
+        overflow: hidden;
+        margin: 12px auto 0;
+        border-radius: 999px;
+        background: var(--soft);
+      }
+
+      #errandBar {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--accent);
+        transition: width 240ms ease;
+      }
+
+      .dialogue {
+        display: grid;
+        gap: 10px;
+        min-height: 150px;
+        margin-top: 20px;
+        text-align: left;
+      }
+
+      .line {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 14px;
+      }
+
+      .line.sera {
+        background: #fffaf0;
+      }
+
+      .line.note {
+        background: var(--blue-soft);
+      }
+
+      .speaker {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1>セラのおつかい報告</h1>
+      <p class="lead">セラにおつかいをお願いして、帰ってくるのを待ちます。</p>
+
+      <section class="panel" aria-label="セラのおつかい報告">
+        <img id="seraImage" src="/assets/uploads/day2-sera_draw.png" alt="セラ">
+
+        <button type="button" id="errandButton">セラにおつかいをお願いする</button>
+
+        <p class="status" id="status">まだ出発していない</p>
+        <p class="attempt" id="attemptText">おつかい回数: 0</p>
+
+        <div class="bar-wrap" aria-hidden="true">
+          <div id="errandBar"></div>
+        </div>
+
+        <div class="dialogue" id="dialogue" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      // 画像を置いているフォルダです。
+      const imageBase = "/assets/uploads/";
+
+      // おつかい結果の候補です。
+      // 結果を増やしたい時は、この配列に同じ形で追加してください。
+      const events = [
+        {
+          status: "成功",
+          image: "day2-sera_win.png",
+          lines: [
+            { speaker: "結果", text: "頼んだものを買ってこられた。", mood: "note" },
+            { speaker: "セラ", text: "できたよ！ たぶん！", mood: "sera" },
+            { speaker: "セレス", text: "たぶんを付けるな。……でも、今回は合ってる。" }
+          ]
+        },
+        {
+          status: "失敗",
+          image: "day2-sera_lose.png",
+          lines: [
+            { speaker: "結果", text: "途中で道を間違えたらしい。", mood: "note" },
+            { speaker: "セラ", text: "道、まちがえた！ でも帰ってこられた！", mood: "sera" },
+            { speaker: "セレス", text: "そこを成果にしないで。予想はしてたけど。" }
+          ]
+        },
+        {
+          status: "予想外の成功",
+          image: "day2-sera_win.png",
+          lines: [
+            { speaker: "結果", text: "頼んだものに加えて、おまけももらってきた。", mood: "note" },
+            { speaker: "セラ", text: "おまけももらった！ セラ、えらい？", mood: "sera" },
+            { speaker: "セレス", text: "運だけはいいね。褒めてはいないよ。" }
+          ]
+        },
+        {
+          status: "セレス向けのおみやげ",
+          image: "day2-sera_draw.png",
+          lines: [
+            { speaker: "結果", text: "おつかいとは別に、古い本を見つけてきた。", mood: "note" },
+            { speaker: "セラ", text: "セレスの好きそうな本、見つけた！", mood: "sera" },
+            { speaker: "セレス", text: "……余計なことを。いや、見るけど。" }
+          ]
+        },
+        {
+          status: "よく分からない報告",
+          image: "day2-sera_draw.png",
+          lines: [
+            { speaker: "結果", text: "おつかいの内容より、途中で見たものの話が長い。", mood: "note" },
+            { speaker: "セラ", text: "途中で犬がいた！ しっぽがふわってしてた！", mood: "sera" },
+            { speaker: "セレス", text: "おつかいの報告をして。犬の報告じゃなくて。" }
+          ]
+        },
+        {
+          status: "惜しい",
+          image: "day2-sera_lose.png",
+          lines: [
+            { speaker: "結果", text: "頼んだものにかなり近いものを買ってきた。", mood: "note" },
+            { speaker: "セラ", text: "似てるから、たぶん同じ！", mood: "sera" },
+            { speaker: "セレス", text: "違う。……でも、近づこうとした努力は分かる。" }
+          ]
+        }
+      ];
+
+      let attemptCount = 0;
+      let lastEventIndex = -1;
+
+      const seraImage = document.getElementById("seraImage");
+      const errandButton = document.getElementById("errandButton");
+      const statusText = document.getElementById("status");
+      const attemptText = document.getElementById("attemptText");
+      const errandBar = document.getElementById("errandBar");
+      const dialogue = document.getElementById("dialogue");
+
+      // セラの画像を切り替えます。
+      function setSeraImage(fileName) {
+        seraImage.src = imageBase + fileName;
+      }
+
+      // 会話を画面に表示します。
+      function showLines(lines) {
+        dialogue.innerHTML = "";
+
+        lines.forEach((line) => {
+          const lineElement = document.createElement("div");
+          lineElement.className = line.mood ? `line ${line.mood}` : "line";
+          lineElement.innerHTML = `
+            <span class="speaker">${line.speaker}</span>
+            ${line.text}
+          `;
+          dialogue.append(lineElement);
+        });
+      }
+
+      // 同じ結果が連続で出にくいように、前回とは別の結果を選びます。
+      function getRandomEvent() {
+        let eventIndex = Math.floor(Math.random() * events.length);
+
+        if (events.length > 1) {
+          while (eventIndex === lastEventIndex) {
+            eventIndex = Math.floor(Math.random() * events.length);
+          }
+        }
+
+        lastEventIndex = eventIndex;
+        return events[eventIndex];
+      }
+
+      // おつかいを開始します。
+      function goErrand() {
+        attemptCount += 1;
+        attemptText.innerText = `おつかい回数: ${attemptCount}`;
+        errandButton.disabled = true;
+        errandButton.innerText = "セラがおつかい中";
+        statusText.innerText = "セラがおつかい中……";
+        errandBar.style.width = "45%";
+        setSeraImage("day2-sera_wait.png");
+        showLines([
+          { speaker: "セラ", text: "いってきまーす！", mood: "sera" },
+          { speaker: "セレス", text: "走るな。あと寄り道するな。" }
+        ]);
+
+        // 少し待ってから結果を表示します。
+        window.setTimeout(showResult, 1000);
+      }
+
+      // おつかいの結果を表示します。
+      function showResult() {
+        const event = getRandomEvent();
+
+        statusText.innerText = `結果: ${event.status}`;
+        errandBar.style.width = "100%";
+        setSeraImage(event.image);
+        showLines(event.lines);
+
+        errandButton.disabled = false;
+        errandButton.innerText = "もう一度お願いする";
+      }
+
+      // 最初の画面を表示します。
+      function resetView() {
+        setSeraImage("day2-sera_draw.png");
+        errandBar.style.width = "0%";
+        showLines([
+          { speaker: "セラ", text: "セラ、おつかい行けるよ！", mood: "sera" },
+          { speaker: "セレス", text: "本当に大丈夫かな。" }
+        ]);
+      }
+
+      errandButton.addEventListener("click", goErrand);
+      resetView();
+    </script>
+  </body>
+</html>
