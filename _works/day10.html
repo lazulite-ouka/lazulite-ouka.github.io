@@ -1,0 +1,319 @@
+---
+title: セレスとセラ
+category: other
+date: 2026-05-10
+description: 話しかける内容によって、セレスとセラの反応が変わるミニ会話です。
+cover: /assets/uploads/day2-sera_draw.png
+permalink: /works/day10/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セレス
+  - セラ
+  - day10
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セレスとセラ</title>
+
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --ink: #222831;
+        --muted: #687180;
+        --line: #dce2ea;
+        --accent: #5f8fc9;
+        --accent-dark: #3f6d9f;
+        --soft: #edf4fb;
+        --warm: #fff3df;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        width: min(900px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(51, 70, 94, 0.1);
+      }
+
+      .characters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 260px));
+        align-items: end;
+        justify-content: center;
+        gap: clamp(18px, 5vw, 34px);
+        margin-bottom: 22px;
+      }
+
+      .character {
+        display: grid;
+        justify-items: center;
+        gap: 8px;
+      }
+
+      .character img {
+        display: block;
+        width: 100%;
+        max-width: 260px;
+        height: auto;
+      }
+
+      .name {
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        min-height: 50px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 10px 14px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+        color: var(--accent-dark);
+      }
+
+      button:focus-visible {
+        outline: 3px solid rgba(95, 143, 201, 0.28);
+        outline-offset: 2px;
+      }
+
+      button.is-selected {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      #resetButton {
+        width: min(220px, 100%);
+        margin-top: 12px;
+        background: var(--warm);
+      }
+
+      .status {
+        min-height: 1.7em;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .dialogue {
+        display: grid;
+        gap: 10px;
+        min-height: 170px;
+        margin-top: 18px;
+        text-align: left;
+      }
+
+      .line {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 14px;
+      }
+
+      .line.sera {
+        background: #fffaf0;
+      }
+
+      .speaker {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+
+      @media (max-width: 700px) {
+        .characters,
+        .buttons {
+          grid-template-columns: 1fr;
+        }
+
+        .character img {
+          max-width: 230px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1>セレスとセラ</h1>
+      <p class="lead">話しかける内容によって、ふたりの反応が変わります。</p>
+
+      <section class="panel" aria-label="セレスとセラの会話">
+        <div class="characters">
+          <div class="character">
+            <img id="celesImage" src="/assets/uploads/day1-celes.png" alt="セレス">
+            <div class="name">セレス</div>
+          </div>
+
+          <div class="character">
+            <img id="seraImage" src="/assets/uploads/day2-sera_draw.png" alt="セラ">
+            <div class="name">セラ</div>
+          </div>
+        </div>
+
+        <div class="buttons" aria-label="話しかける内容を選ぶ">
+          <button type="button" data-scene="celes">セレスを褒める</button>
+          <button type="button" data-scene="sera">セラを褒める</button>
+          <button type="button" data-scene="both">ふたりに話しかける</button>
+        </div>
+
+        <button id="resetButton" type="button">最初に戻す</button>
+
+        <p class="status" id="status">セレスは本を読んでいる</p>
+
+        <div class="dialogue" id="dialogue" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      // 画像を置いているフォルダです。
+      const imageBase = "/assets/uploads/";
+
+      // 会話の内容です。
+      // セリフを直したい時は、この中の text を編集してください。
+      const scenes = {
+        start: {
+          status: "セレスは本を読んでいる",
+          celesImage: "day1-celes.png",
+          seraImage: "day2-sera_draw.png",
+          lines: [
+            { speaker: "セレス", text: "……何？" },
+            { speaker: "セラ", text: "こんにちはー！", mood: "sera" }
+          ]
+        },
+        celes: {
+          status: "セラが自分のことのように嬉しそうにしている",
+          celesImage: "day4-celes2.png",
+          seraImage: "day2-sera_win.png",
+          lines: [
+            { speaker: "セレス", text: "……急に何。" },
+            { speaker: "セラ", text: "でしょ！ セレスすごいんだよ！", mood: "sera" },
+            { speaker: "セレス", text: "君が得意げになる意味、ある？ ……まあ、否定はしないけど。" }
+          ]
+        },
+        sera: {
+          status: "セラがかなり調子に乗っている",
+          celesImage: "day1-celes.png",
+          seraImage: "day2-sera_win.png",
+          lines: [
+            { speaker: "セラ", text: "えへへー！ セラ、すごい？", mood: "sera" },
+            { speaker: "セレス", text: "調子に乗るよ。……でも、今日のは悪くない。" },
+            { speaker: "セラ", text: "やったー！ セレスがちょっと褒めた！", mood: "sera" },
+            { speaker: "セレス", text: "聞き間違い。" }
+          ]
+        },
+        both: {
+          status: "少し騒がしくなった",
+          celesImage: "day4-celes2.png",
+          seraImage: "day2-sera_draw.png",
+          lines: [
+            { speaker: "セラ", text: "なになに？ セラもお話する！", mood: "sera" },
+            { speaker: "セレス", text: "……騒がしくなる予感しかしない。" },
+            { speaker: "セラ", text: "セレスもお話しようよー！", mood: "sera" },
+            { speaker: "セレス", text: "僕を巻き込むな。……少しだけだよ。" }
+          ]
+        }
+      };
+
+      const celesImage = document.getElementById("celesImage");
+      const seraImage = document.getElementById("seraImage");
+      const dialogue = document.getElementById("dialogue");
+      const statusText = document.getElementById("status");
+      const sceneButtons = document.querySelectorAll("[data-scene]");
+      const resetButton = document.getElementById("resetButton");
+
+      // 会話を画面に表示します。
+      function renderScene(sceneName) {
+        const scene = scenes[sceneName];
+
+        celesImage.src = imageBase + scene.celesImage;
+        seraImage.src = imageBase + scene.seraImage;
+        statusText.innerText = scene.status;
+
+        dialogue.innerHTML = "";
+        scene.lines.forEach((line) => {
+          const lineElement = document.createElement("div");
+          lineElement.className = line.mood === "sera" ? "line sera" : "line";
+          lineElement.innerHTML = `
+            <span class="speaker">${line.speaker}</span>
+            ${line.text}
+          `;
+          dialogue.append(lineElement);
+        });
+
+        sceneButtons.forEach((button) => {
+          button.classList.toggle("is-selected", button.dataset.scene === sceneName);
+        });
+      }
+
+      sceneButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          renderScene(button.dataset.scene);
+        });
+      });
+
+      resetButton.addEventListener("click", () => {
+        renderScene("start");
+      });
+
+      renderScene("start");
+    </script>
+  </body>
+</html>

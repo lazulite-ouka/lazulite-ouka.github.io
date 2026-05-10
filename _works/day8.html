@@ -1,0 +1,335 @@
+---
+title: セラの応援ボタン
+category: other
+date: 2026-05-07
+description: 応援ボタンを押すと、セラがどんどん元気になる小さなゲームです。
+cover: /assets/images/sample-other.png
+permalink: /works/day8/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セラ
+  - セレス
+  - day8
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セラの応援ボタン</title>
+
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff7ee;
+        --surface: #ffffff;
+        --ink: #2d2722;
+        --muted: #7a6b5f;
+        --line: #ead8c4;
+        --accent: #bd6f3f;
+        --accent-dark: #8d4e28;
+        --soft: #fbefe3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+        text-align: center;
+      }
+
+      main {
+        width: min(680px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 32px);
+        box-shadow: 0 16px 36px rgba(105, 76, 46, 0.12);
+      }
+
+      .sera-mark {
+        display: grid;
+        width: min(160px, 52vw);
+        aspect-ratio: 1;
+        place-items: center;
+        margin: 0 auto 18px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: var(--soft);
+        color: var(--accent-dark);
+        font-size: 1.45rem;
+        font-weight: 900;
+        transition:
+          transform 140ms ease,
+          background 180ms ease;
+      }
+
+      .sera-mark.is-pop {
+        transform: translateY(-2px) scale(1.04);
+      }
+
+      .stage-label {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .bar-wrap {
+        width: min(360px, 90%);
+        height: 22px;
+        overflow: hidden;
+        margin: 0 auto 18px;
+        border-radius: 999px;
+        background: #f1dfcc;
+      }
+
+      #cheerBar {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: #f4a261;
+        transition: width 120ms ease;
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      button {
+        min-width: 150px;
+        min-height: 46px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 16px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      button.hidden {
+        display: none;
+      }
+
+      #count {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .dialogue {
+        display: grid;
+        gap: 10px;
+        margin-top: 22px;
+        text-align: left;
+      }
+
+      .line {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 14px;
+      }
+
+      .speaker {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1>セラの応援ボタン</h1>
+      <p class="lead">応援すると、セラがどんどん元気になります。</p>
+
+      <section class="panel" aria-label="セラの応援">
+        <div class="sera-mark" id="seraMark">SERA</div>
+        <p class="stage-label" id="stageLabel">準備中</p>
+
+        <div class="bar-wrap" aria-hidden="true">
+          <div id="cheerBar"></div>
+        </div>
+
+        <div class="buttons">
+          <button id="cheerButton" type="button">セラを応援する</button>
+          <button id="resetButton" type="button" class="hidden">もう一回</button>
+        </div>
+
+        <div id="count">応援: 0回</div>
+        <div class="dialogue" id="dialogue" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      // 応援された回数です。
+      let cheerCount = 0;
+
+      // この回数まで応援するとクリアです。
+      const maxCheer = 50;
+
+      // 段階ごとの表示とセリフです。増やしたい時はここを編集します。
+      const stages = [
+        {
+          min: 0,
+          label: "まだ少しそわそわしている",
+          mark: "SERA",
+          sera: "応援してくれるの？セラ、がんばるね！",
+          celes: "……すぐ調子に乗るよ。",
+        },
+        {
+          min: 5,
+          label: "少し元気が出てきた",
+          mark: "SERA+",
+          sera: "えへへ、なんか元気出てきた！",
+          celes: "単純だね。悪い意味だけじゃないけど。",
+        },
+        {
+          min: 15,
+          label: "かなり前向き",
+          mark: "SERA++",
+          sera: "もっと応援してー！セラ、まだいける！",
+          celes: "要求が早い。休む発想を覚えなよ。",
+        },
+        {
+          min: 30,
+          label: "全力で元気",
+          mark: "SERA MAX",
+          sera: "セラ、すごく頑張れる気がする！",
+          celes: "気分だけで走ると転ぶ。水くらい飲みなよ。",
+        },
+        {
+          min: 45,
+          label: "止まらない元気",
+          mark: "SERA!",
+          sera: "セレス見て見て！セラ、元気いっぱい！",
+          celes: "見なくても分かる。声量でね。",
+        },
+        {
+          min: 50,
+          label: "応援完了",
+          mark: "CLEAR",
+          sera: "やったー！いっぱい応援してもらった！",
+          celes: "……まあ、よかったんじゃない。倒れたら運ぶのは僕だし。",
+        },
+      ];
+
+      const cheerButton = document.getElementById("cheerButton");
+      const resetButton = document.getElementById("resetButton");
+      const cheerBar = document.getElementById("cheerBar");
+      const countText = document.getElementById("count");
+      const dialogue = document.getElementById("dialogue");
+      const seraMark = document.getElementById("seraMark");
+      const stageLabel = document.getElementById("stageLabel");
+
+      // 今の応援回数に合う段階を探します。
+      function getStage() {
+        let currentStage = stages[0];
+
+        stages.forEach((stage) => {
+          if (cheerCount >= stage.min) {
+            currentStage = stage;
+          }
+        });
+
+        return currentStage;
+      }
+
+      // 会話欄を作ります。
+      function renderDialogue(stage) {
+        dialogue.innerHTML = `
+          <div class="line">
+            <span class="speaker">セラ</span>
+            セラ「${stage.sera}」
+          </div>
+          <div class="line">
+            <span class="speaker">セレス</span>
+            セレス「${stage.celes}」
+          </div>
+        `;
+      }
+
+      // 画面全体を今の状態に合わせて更新します。
+      function updateView() {
+        const stage = getStage();
+        const percent = Math.min((cheerCount / maxCheer) * 100, 100);
+
+        cheerBar.style.width = `${percent}%`;
+        countText.innerText = `応援: ${cheerCount}回`;
+        seraMark.innerText = stage.mark;
+        stageLabel.innerText = stage.label;
+        renderDialogue(stage);
+
+        // 少しだけ弾む演出です。
+        seraMark.classList.add("is-pop");
+        window.setTimeout(() => {
+          seraMark.classList.remove("is-pop");
+        }, 140);
+
+        // クリアしたら応援ボタンを隠します。
+        if (cheerCount >= maxCheer) {
+          cheerButton.classList.add("hidden");
+          resetButton.classList.remove("hidden");
+        }
+      }
+
+      // 応援ボタンを押した時の処理です。
+      function cheer() {
+        if (cheerCount >= maxCheer) return;
+        cheerCount += 1;
+        updateView();
+      }
+
+      // 最初からやり直す処理です。
+      function resetGame() {
+        cheerCount = 0;
+        cheerButton.classList.remove("hidden");
+        resetButton.classList.add("hidden");
+        updateView();
+      }
+
+      cheerButton.addEventListener("click", cheer);
+      resetButton.addEventListener("click", resetGame);
+
+      updateView();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,421 @@
+---
+title: セレスを放っておけない
+category: other
+date: 2026-05-10 13:00:00 +0900
+description: 静かに見守るか、途中で話しかけるかでセレスの反応が変わるミニ会話です。
+cover: /assets/uploads/day1-celes.png
+permalink: /works/day12/
+layout: none
+show_hero: false
+tags:
+  - その他
+  - セレス
+  - day12
+  - ミニゲーム
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>セレスを放っておけない</title>
+
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --ink: #222831;
+        --muted: #687180;
+        --line: #dce2ea;
+        --accent: #5f8fc9;
+        --accent-dark: #3f6d9f;
+        --soft: #eef5ff;
+        --warm: #fff5e8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.7;
+        text-align: center;
+      }
+
+      main {
+        width: min(720px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0 48px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.3;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(18px, 5vw, 30px);
+        box-shadow: 0 16px 36px rgba(51, 70, 94, 0.1);
+      }
+
+      #celesImage {
+        display: block;
+        width: min(260px, 72vw);
+        height: auto;
+        margin: 0 auto 18px;
+      }
+
+      .status {
+        min-height: 1.7em;
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      button {
+        min-width: 140px;
+        min-height: 46px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 14px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+      }
+
+      button:focus-visible {
+        outline: 3px solid rgba(95, 143, 201, 0.28);
+        outline-offset: 2px;
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.58;
+      }
+
+      #resetButton {
+        border-color: var(--line);
+        background: #ffffff;
+        color: var(--accent-dark);
+      }
+
+      .progress {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+
+      .bar-wrap {
+        width: min(360px, 100%);
+        height: 14px;
+        overflow: hidden;
+        margin: 8px auto 0;
+        border-radius: 999px;
+        background: var(--soft);
+      }
+
+      #quietBar {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--accent);
+        transition: width 240ms ease;
+      }
+
+      .dialogue {
+        display: grid;
+        gap: 10px;
+        min-height: 150px;
+        margin-top: 20px;
+        text-align: left;
+      }
+
+      .line {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 14px;
+      }
+
+      .line.soft {
+        background: var(--warm);
+      }
+
+      .speaker {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1>セレスを放っておけない</h1>
+      <p class="lead">静かにしていると、セレスは勝手に過ごします。</p>
+
+      <section class="panel" aria-label="セレスを見守る">
+        <img id="celesImage" src="/assets/uploads/day1-celes.png" alt="セレス">
+
+        <p class="status" id="status">セレスは本を読もうとしている</p>
+
+        <div class="buttons">
+          <button type="button" id="startButton">静かに見守る</button>
+          <button type="button" id="interruptButton">話しかける</button>
+          <button type="button" id="resetButton">最初から</button>
+        </div>
+
+        <div class="progress" id="progressText">静けさ: 0 / 5</div>
+        <div class="bar-wrap" aria-hidden="true">
+          <div id="quietBar"></div>
+        </div>
+
+        <div class="dialogue" id="dialogue" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      // 画像を置いているフォルダです。
+      const imageBase = "/assets/uploads/";
+
+      // 自動で進む場面です。
+      // セリフを変えたい時は、この中の text を編集してください。
+      const quietScenes = [
+        {
+          status: "静かに見守っている",
+          image: "day1-celes.png",
+          lines: [
+            { speaker: "セレス", text: "……本当に黙ってるんだ。" }
+          ]
+        },
+        {
+          status: "セレスは本を読み始めた",
+          image: "day1-celes.png",
+          lines: [
+            { speaker: "セレス", text: "……まあ、静かなのは悪くない。" }
+          ]
+        },
+        {
+          status: "セレスが少しだけこちらを見た",
+          image: "day4-celes2.png",
+          lines: [
+            { speaker: "セレス", text: "まだいるんだ。" }
+          ]
+        },
+        {
+          status: "セレスはまた本に視線を戻した",
+          image: "day1-celes.png",
+          lines: [
+            { speaker: "セレス", text: "暇なんだね、君。" }
+          ]
+        },
+        {
+          status: "静かな時間が続いている",
+          image: "day4-celes2.png",
+          lines: [
+            { speaker: "セレス", text: "……邪魔しないなら、別にいいけど。" }
+          ]
+        },
+        {
+          status: "最後まで静かに見守った",
+          image: "day4-celes2.png",
+          lines: [
+            { speaker: "セレス", text: "……君、変わってるね。" },
+            { speaker: "セレス", text: "褒めてはいないよ。……たぶん。", mood: "soft" }
+          ]
+        }
+      ];
+
+      // 話しかけたタイミングごとの反応です。
+      const interruptScenes = [
+        {
+          status: "すぐに話しかけた",
+          image: "day1-celes.png",
+          lines: [
+            { speaker: "セレス", text: "……静かにするんじゃなかったの。" }
+          ]
+        },
+        {
+          status: "本を読み始めたところで中断した",
+          image: "day1-celes.png",
+          lines: [
+            { speaker: "セレス", text: "何？" },
+            { speaker: "セレス", text: "今、読み始めたところなんだけど。" }
+          ]
+        },
+        {
+          status: "目が合ったところで話しかけた",
+          image: "day4-celes2.png",
+          lines: [
+            { speaker: "セレス", text: "……急だね。" },
+            { speaker: "セレス", text: "用があるなら先に言えば。" }
+          ]
+        },
+        {
+          status: "集中してきたところで中断した",
+          image: "day1-celes.png",
+          lines: [
+            { speaker: "セレス", text: "集中切れた。" },
+            { speaker: "セレス", text: "君、間が悪いね。" }
+          ]
+        },
+        {
+          status: "かなり静かだったところで中断した",
+          image: "day4-celes2.png",
+          lines: [
+            { speaker: "セレス", text: "今ちょうど静かだったのに。" },
+            { speaker: "セレス", text: "……まあ、用件くらいは聞く。" }
+          ]
+        },
+        {
+          status: "見守り終わったあとに話しかけた",
+          image: "day4-celes2.png",
+          lines: [
+            { speaker: "セレス", text: "今さら話すの？" },
+            { speaker: "セレス", text: "……いいよ。少しだけなら。", mood: "soft" }
+          ]
+        }
+      ];
+
+      let sceneLevel = 0;
+      let timerId = null;
+
+      const celesImage = document.getElementById("celesImage");
+      const statusText = document.getElementById("status");
+      const dialogue = document.getElementById("dialogue");
+      const progressText = document.getElementById("progressText");
+      const quietBar = document.getElementById("quietBar");
+      const startButton = document.getElementById("startButton");
+      const interruptButton = document.getElementById("interruptButton");
+      const resetButton = document.getElementById("resetButton");
+
+      // 画像を切り替えます。
+      function setCelesImage(fileName) {
+        celesImage.src = imageBase + fileName;
+      }
+
+      // 会話を画面に表示します。
+      function showLines(lines) {
+        dialogue.innerHTML = "";
+
+        lines.forEach((line) => {
+          const lineElement = document.createElement("div");
+          lineElement.className = line.mood === "soft" ? "line soft" : "line";
+          lineElement.innerHTML = `
+            <span class="speaker">${line.speaker}</span>
+            ${line.text}
+          `;
+          dialogue.append(lineElement);
+        });
+      }
+
+      // 現在の静けさを表示します。
+      function updateProgress() {
+        const maxLevel = quietScenes.length - 1;
+        const percent = Math.min((sceneLevel / maxLevel) * 100, 100);
+
+        progressText.innerText = `静けさ: ${sceneLevel} / ${maxLevel}`;
+        quietBar.style.width = `${percent}%`;
+      }
+
+      // 場面を画面に反映します。
+      function renderScene(scene) {
+        setCelesImage(scene.image);
+        statusText.innerText = scene.status;
+        showLines(scene.lines);
+        updateProgress();
+      }
+
+      // 次の場面を予約します。
+      function scheduleNextScene() {
+        timerId = window.setTimeout(nextScene, 4000);
+      }
+
+      // 放置中に場面を進めます。
+      function nextScene() {
+        sceneLevel += 1;
+        renderScene(quietScenes[sceneLevel]);
+
+        if (sceneLevel >= quietScenes.length - 1) {
+          timerId = null;
+          startButton.disabled = false;
+          return;
+        }
+
+        scheduleNextScene();
+      }
+
+      // 放置イベントを開始します。
+      function startWatching() {
+        window.clearTimeout(timerId);
+
+        sceneLevel = 0;
+        startButton.disabled = true;
+        renderScene(quietScenes[0]);
+        scheduleNextScene();
+      }
+
+      // 放置中、または放置後に話しかけます。
+      function interrupt() {
+        window.clearTimeout(timerId);
+        timerId = null;
+        startButton.disabled = false;
+
+        const scene = interruptScenes[Math.min(sceneLevel, interruptScenes.length - 1)];
+        renderScene(scene);
+      }
+
+      // 最初の状態に戻します。
+      function resetGame() {
+        window.clearTimeout(timerId);
+        timerId = null;
+        sceneLevel = 0;
+        startButton.disabled = false;
+        setCelesImage("day1-celes.png");
+        statusText.innerText = "セレスは本を読もうとしている";
+        showLines([
+          { speaker: "セレス", text: "……静かにするなら、そこにいれば。" }
+        ]);
+        updateProgress();
+      }
+
+      startButton.addEventListener("click", startWatching);
+      interruptButton.addEventListener("click", interrupt);
+      resetButton.addEventListener("click", resetGame);
+
+      resetGame();
+    </script>
+  </body>
+</html>
